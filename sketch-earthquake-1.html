@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<title>Sketching</title>
+<link href="style.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-light fixed-top bg-white">
+<div class="container">
+	<a class="navbar-brand" href="index.html">Sketching</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+	<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+		<ul class="navbar-nav ml-auto">
+			<li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="http://profesor.faco.cl" id="el_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Earthquake</a>
+            <div class="dropdown-menu" aria-labelledby="el_dropdown">
+              <a class="dropdown-item active" href="sketch-earthquake-1.html">M4.5+ Earthquakes</a>
+              <a class="dropdown-item" href="sketch-earthquake-2.html">20 Largest Earthquakes</a>
+            </div>
+          </li>
+			<li class="nav-item"><a class="nav-link" href="sketch-money.html">Money</a></li>
+			<li class="nav-item"><a class="nav-link" href="sketch-regiones.html">Regiones</a></li>
+			<li class="nav-item"><a class="nav-link" href="sketch-titanic.html">Titanic</a></li>
+		</ul>
+	</div>
+</div>
+</nav>
+<div class="container py-5">
+<div class="row justify-content-center">
+		<div class="col">
+			<h1><span id="nro"></span> Earthquakes</h1>
+			<p class="text-muted">A continuación se dibuja una visualización de los temblores +4.5 M que han sido registrados por la UGS en las últimas 24 horas. Para realizar la visualización con el menor <a href="http://www.infovis-wiki.net/index.php?title=Lie_Factor">Lie Factor</a> posible, mapeo los registros con un máximo igual al <a href="https://earthquake.usgs.gov/earthquakes/browse/largest-world.php">mayor temblor registrado en la historia</a>, el Terremoto de Valdivia (1960)</p>
+		</div>
+	</div>
+</div>
+
+<div class="container-fluid">
+<div class="row" style="overflow: hidden;">
+		<div id="here"></div>
+	</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/addons/p5.dom.min.js"></script>
+<script>
+var earthquakes;
+var n;
+function preload() {
+	earthquakes = loadJSON('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson');
+}
+function setup() {
+	//defino n, que es el número de temblores registrados en el JSON
+	n = earthquakes.features.length;
+	//uso n para modificar el título, pero también lo uso en el draw, para establecer la condición a cumplir en el ciclo for
+	document.getElementById("nro").innerHTML= n;
+	console.log(earthquakes);
+	var canvas = createCanvas(windowWidth, windowHeight);
+	canvas.position(0,0);
+	canvas.style('z-index','-1')
+	noLoop();
+	noStroke();
+}
+function draw() {
+	for(var x = 0; x < n; x++){
+		//este es el valor a mapear cada vez que se cumpla la condición de ciclo for (x < n)
+		var mag = earthquakes.features[x].properties.mag;
+		//defino un máximo para mi mapeo
+		var max = height/2;
+		//defino un mínimo para mi mapeo
+		var min = height-(height/9);
+		//ahora hago el mapeo de los posibles valores de mag
+		var h = map(mag, 4.5, 9.5, min, max);
+		//defino la posición de cada barra
+		var b = width/(n+2)*(x+1);
+		//primero dibujo rectángulos negro, noten que uso variable max
+		fill(0);
+		rect(b, max, (width/(n+2))-10, height/2.5);
+		//luego dibujo rectángulos blancos semi-traslúcidos sobre la barra negra. Con el truco de la transparencia queda como si el negro fuese la barra y el gris lo que le falta para llegar al max --> http://i0.kym-cdn.com/entries/icons/original/000/022/138/reece.JPG --> lo que tengo son barras dadas vuelta, por el problema que ya les expliqué de las coordenadas cartesianas
+		fill(255,155);
+		rect(b, h, (width/(n+2))-10, (height/4)-h);
+		//la magnitud
+		fill(100);
+		textSize(16);
+		textAlign(CENTER);
+		text(mag,b,h-18,(width/(n+2))-10,16);
+	}
+}
+</script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
